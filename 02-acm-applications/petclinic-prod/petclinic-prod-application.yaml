@@ -1,0 +1,67 @@
+apiVersion: v1                    
+kind: Namespace
+metadata:
+  name: application-petclinic-prod                             
+---
+apiVersion: v1                    
+kind: Namespace
+metadata:
+  name: channel-petclinic-prod                             
+---
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: petclinic-prod
+  namespace: application-petclinic-prod
+spec:
+  componentKinds:
+  - group: apps.open-cluster-management.io
+    kind: Subscription
+  descriptor: {}
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values: 
+          - petclinic-prod
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  annotations:
+    apps.open-cluster-management.io/reconcile-rate: high
+  name: petclinic-prod
+  namespace: channel-petclinic-prod
+spec:
+  type: Git
+  pathname: https://github.com/pittar-demos/intro-to-acm-and-acs
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  annotations:
+    apps.open-cluster-management.io/git-branch: main
+    apps.open-cluster-management.io/git-path: 02-gitops-apps/petclinic/overlays/prod
+    apps.open-cluster-management.io/reconcile-option: merge
+  labels:
+    app: petclinic-prod
+  name: petclinic-prod-subscription
+  namespace: application-petclinic-prod
+spec:
+  channel: channel-petclinic-prod/petclinic-prod
+  placement:
+    placementRef:
+      kind: PlacementRule
+      name: petclinic-prod-placement
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  labels:
+    app: petclinic-prod
+  name: petclinic-prod-placement
+  namespace: application-petclinic-prod
+spec:
+  clusterSelector:
+    matchLabels:
+      'petclinic-prod': 'true'
