@@ -4,3 +4,6 @@ kind: Kustomization
 bases:
   - acs-central-policy
   - acs-securedcluster-policy
+
+resources:
+  - namespace.yaml
