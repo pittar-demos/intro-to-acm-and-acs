@@ -253,6 +253,7 @@ spec:
         object-templates:
           - complianceType: musthave
             objectDefinition:
+              apiVersion: v1
               kind: ConfigMap
               metadata:
                 name: central-info
