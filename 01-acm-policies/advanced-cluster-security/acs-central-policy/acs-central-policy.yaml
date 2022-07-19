@@ -242,25 +242,6 @@ spec:
                     serviceAccount: create-cluster-init
                     serviceAccountName: create-cluster-init
                     terminationGracePeriodSeconds: 30
-  - objectDefinition:
-      apiVersion: policy.open-cluster-management.io/v1
-      kind: ConfigurationPolicy
-      metadata:
-        name: acs-central-info-configmap
-      spec:
-        remediationAction: inform
-        severity: high
-        object-templates:
-          - complianceType: musthave
-            objectDefinition:
-              apiVersion: v1
-              kind: ConfigMap
-              metadata:
-                name: central-info
-                namespace: stackrox
-              data:
-                cluster-name: |
-                  {{ fromSecret "open-cluster-management-agent" "hub-kubeconfig-secret" "cluster-name" | base64dec }}
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding

@@ -75,6 +75,52 @@ spec:
       apiVersion: policy.open-cluster-management.io/v1
       kind: ConfigurationPolicy
       metadata:
+        name: acs-secrets
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1
+              data:
+                admission-control-cert.pem: '{{hub fromSecret "stackrox-policy" "admission-control-tls" "admission-control-cert.pem" hub}}'
+                admission-control-key.pem: '{{hub fromSecret "stackrox-policy" "admission-control-tls" "admission-control-key.pem" hub}}'
+                ca.pem: '{{hub fromSecret "stackrox-policy" "admission-control-tls" "ca.pem" hub}}'
+              kind: Secret
+              metadata:
+                name: admission-control-tls
+                namespace: stackrox
+              type: Opaque
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1
+              data:
+                collector-cert.pem: '{{hub fromSecret "stackrox-policy" "collector-tls" "collector-cert.pem" hub}}'
+                collector-key.pem: '{{hub fromSecret "stackrox-policy" "collector-tls" "collector-key.pem" hub}}'
+                ca.pem: '{{hub fromSecret "stackrox-policy" "collector-tls" "ca.pem" hub}}'
+              kind: Secret
+              metadata:
+                name: collector-tls
+                namespace: stackrox
+              type: Opaque
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1
+              data:
+                sensor-cert.pem: '{{hub fromSecret "stackrox-policy" "sensor-tls" "sensor-cert.pem" hub}}'
+                sensor-key.pem: '{{hub fromSecret "stackrox-policy" "sensor-tls" "sensor-key.pem" hub}}'
+                ca.pem: '{{hub fromSecret "stackrox-policy" "sensor-tls" "ca.pem" hub}}'
+                acs-host: '{{hub fromSecret "stackrox-policy" "sensor-tls" "acs-host" hub}}'
+              kind: Secret
+              metadata:
+                name: sensor-tls
+                namespace: stackrox
+              type: Opaque
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
         name: acs-endpoints
       spec:
         remediationAction: inform
@@ -89,11 +135,11 @@ spec:
                 name: stackrox-secured-cluster-services
               spec:
                 clusterName: |
-                  {{hub fromConfigMap "stackrox" "central-info" "cluster-name" hub}}
+                  {{ fromSecret "open-cluster-management-agent" "hub-kubeconfig-secret" "cluster-name" | base64dec }}
                 auditLogs:
                   collection: Auto
                 centralEndpoint: |
-                  {{hub fromSecret "stackrox" "sensor-tls" "acs-host" | base64dec hub}}
+                  {{ fromSecret "stackrox" "sensor-tls" "acs-host" | base64dec }}
                 admissionControl:
                   listenOnCreates: false
                   listenOnEvents: true
