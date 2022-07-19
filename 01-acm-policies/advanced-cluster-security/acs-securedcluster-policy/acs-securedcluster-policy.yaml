@@ -35,6 +35,12 @@ spec:
               kind: Namespace
               metadata:
                 name: stackrox
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: rhacs-operator
   - objectDefinition:
       apiVersion: policy.open-cluster-management.io/v1
       kind: ConfigurationPolicy
@@ -50,13 +56,21 @@ spec:
               kind: Subscription
               metadata:
                 name: rhacs-operator
-                namespace: openshift-operators
+                namespace: rhacs-operator
               spec:
                 channel: latest
                 installPlanApproval: Automatic
                 name: rhacs-operator
                 source: redhat-operators
                 sourceNamespace: openshift-marketplace
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: operators.coreos.com/v1
+              kind: OperatorGroup
+              metadata:
+                name: rhacs-operator-group
+                namespace: rhacs-operator
+              spec: {}
   - objectDefinition:
       apiVersion: policy.open-cluster-management.io/v1
       kind: ConfigurationPolicy
@@ -75,7 +89,7 @@ spec:
                 name: stackrox-secured-cluster-services
               spec:
                 clusterName: |
-                  {{hub fromSecret "open-cluster-management-agent" "hub-kubeconfig-secret" "cluster-name" | base64dec hub}}
+                  {{hub fromConfigMap "stackrox" "central-info" "cluster-name" hub}}
                 auditLogs:
                   collection: Auto
                 centralEndpoint: |

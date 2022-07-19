@@ -27,6 +27,12 @@ spec:
               kind: Namespace
               metadata:
                 name: stackrox
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: rhacs-operator
   - objectDefinition:
       apiVersion: policy.open-cluster-management.io/v1
       kind: ConfigurationPolicy
@@ -42,13 +48,21 @@ spec:
               kind: Subscription
               metadata:
                 name: rhacs-operator
-                namespace: openshift-operators
+                namespace: rhacs-operator
               spec:
                 channel: latest
                 installPlanApproval: Automatic
                 name: rhacs-operator
                 source: redhat-operators
                 sourceNamespace: openshift-marketplace
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: operators.coreos.com/v1
+              kind: OperatorGroup
+              metadata:
+                name: rhacs-operator-group
+                namespace: rhacs-operator
+              spec: {}
   - objectDefinition:
       apiVersion: policy.open-cluster-management.io/v1
       kind: ConfigurationPolicy
@@ -228,6 +242,24 @@ spec:
                     serviceAccount: create-cluster-init
                     serviceAccountName: create-cluster-init
                     terminationGracePeriodSeconds: 30
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: acs-central-info-configmap
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              kind: ConfigMap
+              metadata:
+                name: central-info
+                namespace: stackrox
+              data:
+                cluster-name: |
+                  {{ fromSecret "open-cluster-management-agent" "hub-kubeconfig-secret" "cluster-name" | base64dec }}
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
