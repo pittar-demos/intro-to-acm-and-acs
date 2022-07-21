@@ -29,3 +29,11 @@ Apply everything in the `01-acm-policies` directory to load up the policies requ
 ```
 oc apply -k 01-acm-policies
 ```
+
+### Management Cluster Setup: ACM Applications
+
+Apply everything in the `02-acm-applications` directory to load up the applications required for this demo.
+
+```
+oc apply -k 02-acm-applications
+```
